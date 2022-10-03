@@ -9,7 +9,7 @@ Solver RK45
     atol : 10**-6
     rtol : 10**-6
     max step size : 1
-    write interval : 1
+    write interval : 2
 
 Defaults 
     flow_tau : 10**6
@@ -33,8 +33,8 @@ Surroundings heavy_source of continuous phase heavy_phase
 Compartment heavy_comp of continuous phase heavy_phase  
     volume : 0.001
     IncompressiblePhase heavy_phase to heavy_comp 
+        hno3 : 6 | species which is used for D must come first. Issue with code.
         water : 55.5
-        hno3 : 6
         density : 999
 
 Surroundings heavy_sink of continuous phase heavy_phase  
@@ -67,10 +67,10 @@ ConvectiveTransport heavy_comp from heavy_comp to heavy_sink
 |||     Mass transfer    |||
 |||----------------------|||
 
-|MassTransfer heavy_to_light_MT of species solute from heavy_comp to light_comp
-|    ks : 1*10**-5
-|    kt : 1*10**-5
-|    area : 1
-|    S : @S_func_conc(self, 'heavy_comp', 'heavy_phase', 'solute', '1 / 0.843')
+MassTransfer heavy_to_light_MT of species hno3 from heavy_comp to light_comp
+    ks : 1*10**-5
+    kt : 1*10**-5
+    area : 1
+    S : @S_func_conc(self, 'heavy_comp', 'heavy_phase', 'THIS DOES NOT WORK', '(-1.629145E-22 * C**6) + (3.599421*10**-18 * C**5) - (3.200304*10**-14 * C**4) + (1.467804*10**-10 * C**3) - (3.678222*10**-7 * C**2) + (4.635409*10**-4 * C) + (9.867248*10**-3)') |Issue: species must be listed first in define components
 
 end
