@@ -1,41 +1,76 @@
-|Author : Kieran Jervis
+|||----------------------|||
+|||     Cofiguration     |||
+|||----------------------|||
 
- ||||||||||||||||||||||||||||||||||
-||||||* Example of S=f(conc) *||||||
- ||||||||||||||||||||||||||||||||||
-
-|Mass transfer rate set to 0 by setting area to zero
-|vessel with NaCl is filled with H2O reducing the concentration of NaCl over time.
-|S is set as a function of NaC concentration
-
-
-Solver LSODA
+|Solver Tsit5() |Rosenbrock23	| For julia see https://diffeq.sciml.ai/stable/solvers/ode_solve/ and https://github.com/SciML/diffeqpy
+Solver RK45
     t_start : 0
-    t_final : 300
+    t_final : 60
     atol : 10**-6
     rtol : 10**-6
+    max step size : 1
     write interval : 1
 
-DefineComponents |name: molecular weight(kg/mole)
-    H2O : 0.018
-    NaCl : 0.2
+Defaults 
+    flow_tau : 10**6
 
-Compartment VESSEL of continuous phase LIQUID
-    volume : 10
-    IncompressiblePhase LIQUID to VESSEL
-       NaCl : 20000
+DefineComponents | name : molecular weight (kg/mole)
+    heavy : 0.0180
+    light : 0.09214 
+    solute : 0.05808
 
-Surroundings SOURCE of continuous phase LIQUID
-    volume : 10
-    IncompressiblePhase LIQUID to SOURCE
-        H2O : 45000
+|||---------------------|||
+|||     Compartments    |||
+|||---------------------|||
 
-ConvectiveTransport TRANSPORT from SOURCE to VESSEL
+Surroundings heavy_source of continuous phase heavy_phase 
+    volume : 1*10**-3
+    IncompressiblePhase heavy_phase to heavy_source
+        heavy : 55.5
+        solute : 3   
+        density : 999
+
+Compartment heavy_comp of continuous phase heavy_phase  
+    volume : 50*10**-6
+    IncompressiblePhase heavy_phase to heavy_comp 
+        heavy : 2.77
+        solute : 0
+        density : 999
+
+Surroundings heavy_sink of continuous phase heavy_phase  
+    volume : 10 
+    IncompressiblePhase heavy_phase to heavy_sink
+        density : 999
+
+Compartment light_comp of continuous phase light_phase  
+    volume : 50*10**-6
+    IncompressiblePhase light_phase to light_comp 
+        heavy : 0.470
+        solute : 0
+        density : 867 
+
+|||-----------------|||
+|||     Flows       |||
+|||-----------------|||
+
+ConvectiveTransport heavy_feed from heavy_source to heavy_comp
     fixed flow : True
-    velocity : 0.01
+    area : 1
+    velocity : 0.05 / 1000 
+    
+ConvectiveTransport heavy_comp from heavy_comp to heavy_sink
+    fixed flow : True
+    area : 1
+    velocity : 0.05 / 1000
 
-MassTransfer TRANSFER of species NaCl from VESSEL to SOURCE
-    area : 0
-    S : @S_func_conc(self, 'VESSEL', 'LIQUID', 'H2O', '(C/10000)**3')
+|||----------------------|||
+|||     Mass transfer    |||
+|||----------------------|||
+
+MassTransfer heavy_to_light_MT of species solute from heavy_comp to light_comp
+    ks : 1*10**-5
+    kt : 1*10**-5
+    area : 1
+    S : @S_func_conc(self, 'heavy_comp', 'heavy_phase', 'solute', '1 / 0.843')
 
 end
