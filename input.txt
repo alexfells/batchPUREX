@@ -1,0 +1,40 @@
+|Author : Kieran Jervis
+
+ ||||||||||||||||||||||||||||||||||
+||||||* Example of S=f(conc) *||||||
+ ||||||||||||||||||||||||||||||||||
+
+|Mass transfer rate set to 0 by setting area to zero
+|vessel with NaCl is filled with H2O reducing the concentration of NaCl over time.
+|S is set as a function of NaC concentration
+
+
+Solver LSODA
+    t_start : 0
+    t_final : 300
+    atol : 10**-6
+    rtol : 10**-6
+
+DefineComponents |name: molecular weight(kg/mole)
+    H2O : 0.018
+    NaCl : 0.2
+
+Compartment VESSEL of continuous phase LIQUID
+    volume : 10
+    IncompressiblePhase LIQUID to VESSEL
+       NaCl : 20000
+
+Surroundings SOURCE of continuous phase LIQUID
+    volume : 10
+    IncompressiblePhase LIQUID to SOURCE
+        H2O : 45000
+
+ConvectiveTransport TRANSPORT from SOURCE to VESSEL
+    fixed flow : True
+    velocity : 0.01
+
+MassTransfer TRANSFER of species NaCl from VESSEL to SOURCE
+    area : 0
+    S : @S_func_conc(self, 'VESSEL', 'LIQUID', 'H2O', '(C/10000)**3')
+
+end
